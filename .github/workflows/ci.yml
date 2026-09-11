@@ -178,6 +178,27 @@ jobs:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - name: Build image
         run: docker build --tag osc-${{ matrix.component }}:${{ github.sha }} ./${{ matrix.component }}
+      - name: Smoke history-worker entrypoint
+        if: matrix.component == 'get_history_worker'
+        shell: bash
+        run: |
+          set -euo pipefail
+          container_id=$(docker run --detach --publish 127.0.0.1:18002:8002 \
+            --env LEDGER_GATEWAY_TOKEN=0123456789abcdefghijklmn \
+            osc-${{ matrix.component }}:${{ github.sha }})
+          trap 'docker rm --force "$container_id" >/dev/null 2>&1 || true' EXIT
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:18002/health | grep --fixed-strings '"status":"healthy"' >/dev/null; then
+              exit 0
+            fi
+            if ! docker inspect --format '{{.State.Running}}' "$container_id" | grep --fixed-strings true >/dev/null; then
+              docker logs "$container_id"
+              exit 1
+            fi
+            sleep 1
+          done
+          docker logs "$container_id"
+          exit 1
       - name: Generate CycloneDX image SBOM
         uses: anchore/sbom-action@a930d0ac434e3182448fe678398ba5713717112a # v0.21.0
         with:
