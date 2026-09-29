@@ -168,6 +168,30 @@ def test_artifact_submission_routes_to_citizen_science(channel):
     submit.assert_called_once()
 
 
+def test_artifact_submission_routes_to_magnetic_arch(channel):
+    command = artifact_command()
+    command["organization"] = organization(
+        "MagneticArchMSP", "magnetic-arch-plasma-showcase"
+    )
+    command["request"]["organizationId"] = "magnetic-arch-plasma-showcase"
+    with patch.object(
+        app.peer_clients["MagneticArchMSP"],
+        "submit_artifact",
+        return_value={"success": True, "txId": "tx-magnetic"},
+    ) as submit, patch("app.publish_artifact_submitted"):
+        assert app.process_artifact_submission(channel, ARTIFACT_ID, command) is True
+    submit.assert_called_once()
+
+
+def test_magnetic_arch_command_rejects_cross_organization_metadata():
+    command = artifact_command()
+    command["organization"] = organization(
+        "MagneticArchMSP", "magnetic-arch-plasma-showcase"
+    )
+    with pytest.raises(app.PermanentProcessingError, match="organization"):
+        app._validate_envelope(command, "artifact.create")
+
+
 def test_demo_artifact_preserves_controlled_provenance_and_drops_browser_only_fields(
     channel,
 ):

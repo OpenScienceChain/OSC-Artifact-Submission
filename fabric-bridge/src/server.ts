@@ -31,10 +31,13 @@ const LEDGER_GATEWAY_TOKEN = process.env.LEDGER_GATEWAY_TOKEN || '';
 const NSG_ORGANIZATION_ID = process.env.NSG_ORGANIZATION_ID || 'nsg';
 const CITIZEN_SCIENCE_ORGANIZATION_ID =
   process.env.CITIZEN_SCIENCE_ORGANIZATION_ID || 'citizen-science';
+const MAGNETIC_ARCH_ORGANIZATION_ID =
+  process.env.MAGNETIC_ARCH_ORGANIZATION_ID || 'magnetic-arch-plasma-showcase';
 
 const supportedOrganizations: Record<string, string> = {
   NSGMSP: NSG_ORGANIZATION_ID,
-  CitizenScienceMSP: CITIZEN_SCIENCE_ORGANIZATION_ID
+  CitizenScienceMSP: CITIZEN_SCIENCE_ORGANIZATION_ID,
+  MagneticArchMSP: MAGNETIC_ARCH_ORGANIZATION_ID
 };
 const supportedOrganizationIds = Object.values(supportedOrganizations);
 
@@ -77,7 +80,7 @@ const organizationSchema = Joi.object({
   id: Joi.string().valid(...supportedOrganizationIds).required(),
   name: Joi.string().trim().min(1).max(200).required(),
   slug: Joi.string().trim().max(128).optional(),
-  mspId: Joi.string().valid('NSGMSP', 'CitizenScienceMSP').required(),
+  mspId: Joi.string().valid('NSGMSP', 'CitizenScienceMSP', 'MagneticArchMSP').required(),
   ledgerGroupName: Joi.string().trim().max(128).optional(),
   ledgerApiUserId: Joi.string().trim().max(128).optional(),
   artifactSchemaName: Joi.string().trim().max(128).optional()
