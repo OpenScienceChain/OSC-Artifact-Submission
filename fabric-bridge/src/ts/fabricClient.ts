@@ -197,8 +197,15 @@ export async function submitProvenanceTransaction(
     } catch {
       // Chaincode may intentionally return a non-JSON scalar.
     }
+    const recordTxId =
+      result && typeof result === 'object' && 'lastTransactionId' in result
+        ? (result as { lastTransactionId?: unknown }).lastTransactionId
+        : undefined;
     return {
-      txId: transactionId,
+      txId:
+        typeof recordTxId === 'string' && /^[a-f0-9]{64}$/i.test(recordTxId)
+          ? recordTxId
+          : transactionId,
       committedAt: new Date().toISOString(),
       result
     };

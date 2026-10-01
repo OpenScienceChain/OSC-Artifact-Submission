@@ -64,6 +64,36 @@ describe('Fabric Gateway client', () => {
     expect(result).toMatchObject({ txId: 'tx-001', result: { revision: 1 } });
   });
 
+  it('uses the committed ledger transaction from an idempotency receipt', async () => {
+    const originalTxId = 'a'.repeat(64);
+    const proposalTxId = 'b'.repeat(64);
+    const connection: any = {
+      contract: {
+        newProposal: () => ({
+          getTransactionId: () => proposalTxId,
+          endorse: async () => ({
+            getResult: () =>
+              Buffer.from(JSON.stringify({ revision: 1, lastTransactionId: originalTxId })),
+            submit: async () => ({
+              getStatus: async () => ({ successful: true, transactionId: proposalTxId, code: 0 })
+            })
+          })
+        })
+      }
+    };
+
+    const result = await submitProvenanceTransaction(
+      connection,
+      'artifact',
+      'create',
+      '00000000-0000-4000-8000-000000000001',
+      { title: 'Artifact' },
+      { correlationId: 'replayed-request' }
+    );
+
+    expect(result.txId).toBe(originalTxId);
+  });
+
   it('fails an unsuccessful Fabric commit', async () => {
     const connection: any = {
       contract: {
