@@ -34,7 +34,8 @@
       },
       "peerId": {
         "type": "string",
-        "maxLength": 64
+        "minLength": 1,
+        "maxLength": 256
       },
       "version": {
         "type": "string",
@@ -42,14 +43,6 @@
       }
     },
     "allOf": [
-      {
-        "if": {
-          "properties": { "submissionState": { "const": "SUCCESS" } }
-        },
-        "then": {
-          "required": ["blockchainTxId"]
-        }
-      },
       {
         "if": {
           "properties": { "submissionState": { "const": "FAILED" } }
