@@ -19,7 +19,7 @@ FROM node:24.20.0-alpine3.24@sha256:e67514e5d0f6c46656005e1b693b2ec9d52e80b64130
 WORKDIR /app
 ENV NODE_ENV=production
 
-RUN apk add --no-cache libcrypto3=3.5.8-r0 libssl3=3.5.8-r0 \
+RUN apk add --no-cache 'libcrypto3>=3.5.8-r0' 'libssl3>=3.5.8-r0' \
     && rm -rf /usr/local/lib/node_modules/npm \
       /usr/local/bin/npm \
       /usr/local/bin/npx
